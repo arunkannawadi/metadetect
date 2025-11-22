@@ -1,10 +1,17 @@
 from copy import deepcopy
 
+# Import all the possible measurements, as to allow for a subset within
+# LSST Science Pipelines config framework.
+from ..defaults import _MEAS_TYPES  # noqa
 
 DEFAULT_WEIGHT_FWHMS = {
     'wmom': 1.2,
     'ksigma': 2.0,
     'pgauss': 2.0,
+    # These next two are needed to distinguish running
+    # adaptive moments pre-processing from gauss fitting
+    'gauss': 2.0,
+    'am': 2.0,
 }
 DEFAULT_FWHM_SMOOTH = 0
 DEFAULT_FWHM_REG = 0
