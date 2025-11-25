@@ -89,7 +89,9 @@ def do_coadding(rng, sim_data, nowarp):
 @pytest.mark.parametrize('meas_type', [None, 'wmom', 'ksigma', 'pgauss'])
 @pytest.mark.parametrize('subtract_sky', [None, False, True])
 @pytest.mark.parametrize("metacal_types_option", [None, "1p1m", "full"])
-def test_lsst_metadetect_smoke(meas_type, subtract_sky, metacal_types_option):
+@pytest.mark.parametrize("step_size", [None, 0.01, 0.02])
+def test_lsst_metadetect_smoke(meas_type, subtract_sky, metacal_types_option,
+                               step_size):
     rng = np.random.RandomState(seed=116)
 
     bands = ['r', 'i']
@@ -104,13 +106,15 @@ def test_lsst_metadetect_smoke(meas_type, subtract_sky, metacal_types_option):
     if meas_type is not None:
         config['meas_type'] = meas_type
 
+    config['metacal'] = {}
+    if step_size is not None:
+        config['metacal']['step_size'] = step_size
+
     if metacal_types_option is not None:
         if metacal_types_option == "1p1m":
             metacal_types = ['noshear', '1p', '1m']
-            config['metacal'] = {}
         elif metacal_types_option == "full":
             metacal_types = ['noshear', '1p', '1m', '2p', '2m']
-            config['metacal'] = {}
         config['metacal']['types'] = metacal_types
     else:
         metacal_types = ['noshear', '1p', '1m']

@@ -154,6 +154,10 @@ class MetacalConfig(Config):
         doc="List of artificial shears to apply.",
         default=["noshear", "1p", "1m",],
     )
+    step_size = Field[float](
+        doc="Shear step size",
+        default=0.01,
+    )
 
     def validate(self):
         super().validate()
@@ -263,6 +267,7 @@ class MetadetectTask(Task):
 
         mdict, noise_mdict = get_metacal_mbexps_fixnoise(
             mbexp=mbexp, noise_mbexp=noise_mbexp, types=metacal_types,
+            step=self.config.metacal.step_size,
         )
 
         result = {}
