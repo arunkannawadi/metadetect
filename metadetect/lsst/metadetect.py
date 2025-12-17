@@ -272,7 +272,7 @@ def detect_deblend_and_measure(
 
     LOG.info('measuring with blended stamps')
 
-    sources, detexp = measure.detect_and_deblend(
+    sources, detexp, model_data = measure.detect_and_deblend(
         mbexp=mbexp,
         rng=rng,
         thresh=config['detect']['thresh'],
@@ -282,6 +282,7 @@ def detect_deblend_and_measure(
 
     results = measure.measure(
         mbexp=mbexp,
+        model_data=model_data,
         detexp=detexp,
         sources=sources,
         config=config,
