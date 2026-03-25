@@ -117,6 +117,15 @@ class MetacalConfig(Config):
         ],
     )
 
+    reconv_type = ChoiceField[str](
+        doc="Type of reconvolution kernel to use",
+        default="fitgauss",
+        allowed={
+            "fitgauss": "Use a gaussian fit to determine reconvolution kernel",
+            "gauss": "Use k-space power to determine reconvolution kernel",
+        },
+    )
+
     def validate(self):
         super().validate()
         if not set(self.types).issubset({"noshear", "1p", "1m", "2p", "2m"}):
@@ -529,7 +538,7 @@ def fit_original_psfs_mbexp(mbexp, rng, wgts):
         e2sum = 0.0
         Tsum = 0.0
 
-        for exp, wgt in zip(mbexp, wgts):
+        for iband, exp, wgt in zip(range(nband), mbexp, wgts):
             cen, _ = util.get_integer_center(
                 wcs=exp.getWcs(),
                 bbox=exp.getBBox(),
