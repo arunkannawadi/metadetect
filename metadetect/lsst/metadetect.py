@@ -160,6 +160,12 @@ class MetadetectConfig(Config):
             "sdss": "The SDSS style deblender",
             "scarlet": "The Scarlet deblender",
         },
+        deprecated="Deprecated and unused",
+    )
+
+    detect_deblend_measure = ConfigurableField(
+        doc="Detection, deblending, and measurement config",
+        target=DetectAndDeblendTask,
     )
 
     metacal = ConfigField[MetacalConfig](
@@ -194,6 +200,7 @@ class MetadetectTask(Task):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.makeSubtask("detect")
+        self.makeSubtask("detect_deblend_measure")
 
     def run(
         self,
@@ -238,7 +245,7 @@ class MetadetectTask(Task):
 
         result = {}
         for shear_str, mcal_mbexp in mdict.items():
-            res = detect_deblend_and_measure(
+            res = self.detect_deblend_and_measure(
                 mbexp=mcal_mbexp,
                 config=config,
                 rng=rng,
@@ -258,47 +265,51 @@ class MetadetectTask(Task):
         return result
 
 
-def detect_deblend_and_measure(
-    mbexp,
-    config,
-    rng,
-    show=False,
-):
-    """
-    run detection, deblending and measurements.
+    def detect_deblend_and_measure(
+        self,
+        mbexp,
+        config,
+        rng,
+        show=False,
+    ):
+        """
+        run detection, deblending and measurements.
 
-    Parameters
-    ----------
-    mbexp: lsst.afw.image.MultibandExposure
-        The metacal'ed exposures to process
-    config: dict, optional
-        Configuration for the fitter, metacal, psf, detect, Entries
-        in this dict override defaults; see lsst_configs.py
-    rng: np.random.RandomState
-        Random number generator
-    show: bool, optional
-        If set to True, show images during processing
-    """
+        Parameters
+        ----------
+        mbexp: lsst.afw.image.MultibandExposure
+            The metacal'ed exposures to process
+        config: dict, optional
+            Configuration for the fitter, metacal, psf, detect, Entries
+            in this dict override defaults; see lsst_configs.py
+        rng: np.random.RandomState
+            Random number generator
+        show: bool, optional
+            If set to True, show images during processing
+        """
 
-    dbtask = measure.get_detect_and_deblend_task(
-        rng=rng,
-        thresh=config['detect']['thresh'],
-        deblender=config['deblender'],
-    )
-    sources, detexp, model_data = dbtask.run(mbexp=mbexp, show=show)
+        dbtask = measure.get_detect_and_deblend_task(
+            rng=rng,
+            thresh=config['detect']['thresh'],
+            config=config,
+        )
+        sources, detexp, model_data = self.detect_deblend_and_measure.run(
+            mbexp=mbexp,
+            show=show,
+        )
 
-    results = measure.measure(
-        mbexp=mbexp,
-        model_data=model_data,
-        meas_task=dbtask.meas,
-        detexp=detexp,
-        sources=sources,
-        config=config,
-        rng=rng,
-        show=show,
-    )
+        results = measure.measure(
+            mbexp=mbexp,
+            model_data=model_data,
+            meas_task=dbtask.meas,
+            detexp=detexp,
+            sources=sources,
+            config=config,
+            rng=rng,
+            show=show,
+        )
 
-    return results
+        return results
 
 
 def add_mfrac(config, mfrac, res, exp):
