@@ -155,7 +155,7 @@ class MetadetectConfig(Config):
 
     detect_deblend_measure = ConfigurableField(
         doc="Detection, deblending, and measurement config",
-        target=DetectAndDeblendTask,
+        target=measure.DetectAndDeblendTask,
     )
 
     metacal = ConfigField[MetacalConfig](
