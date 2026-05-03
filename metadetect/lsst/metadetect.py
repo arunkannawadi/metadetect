@@ -282,12 +282,7 @@ class MetadetectTask(Task):
             If set to True, show images during processing
         """
 
-        dbtask = measure.get_detect_and_deblend_task(
-            rng=rng,
-            thresh=config['detect']['thresh'],
-            config=config,
-        )
-        sources, detexp, model_data = self.detect_deblend_and_measure.run(
+        sources, detexp, model_data = self.detect_deblend_measure.run(
             mbexp=mbexp,
             show=show,
         )
@@ -295,7 +290,7 @@ class MetadetectTask(Task):
         results = measure.measure(
             mbexp=mbexp,
             model_data=model_data,
-            meas_task=dbtask.meas,
+            meas_task=self.detect_deblend_measure.meas,
             detexp=detexp,
             sources=sources,
             config=config,
